@@ -23,10 +23,16 @@ import ImageRoundedIcon from '@mui/icons-material/ImageRounded'
 import MovieRoundedIcon from '@mui/icons-material/MovieRounded'
 import NotesRoundedIcon from '@mui/icons-material/NotesRounded'
 import QuizRoundedIcon from '@mui/icons-material/QuizRounded'
+import YouTubeIcon from '@mui/icons-material/YouTube'
 import { useMemo, useState } from 'react'
 import { createId } from '../lib/ids.js'
 import { readFileAsDataUrl } from '../lib/files.js'
 import { DEFAULT_CATEGORIES } from '../lib/categories.js'
+
+function getYoutubeId(url) {
+  const m = url?.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/)
+  return m ? m[1] : null
+}
 
 const CARD_TITLE_LIMIT = 38
 const CARD_DESCRIPTION_LIMIT = 72
@@ -46,6 +52,7 @@ function createBlock(type) {
   if (type === 'practice') return { ...base, prompt: '', hint: '' }
   if (type === 'image') return { ...base, src: '', name: '', mime: '' }
   if (type === 'video') return { ...base, src: '', name: '', mime: '' }
+  if (type === 'youtube') return { ...base, url: '' }
   if (type === 'test')
     return {
       ...base,
@@ -445,6 +452,15 @@ export function CourseEditor({
                               >
                                 Тест
                               </Button>
+                              <Button
+                                size="small"
+                                startIcon={<YouTubeIcon />}
+                                onClick={() => addBlock(stage.id, 'youtube')}
+                                variant="outlined"
+                                color="error"
+                              >
+                                YouTube
+                              </Button>
                             </Stack>
 
                             <Stack spacing={1.5}>
@@ -468,6 +484,7 @@ export function CourseEditor({
                                           {block.type === 'video' && 'Блок: видео'}
                                           {block.type === 'practice' && 'Блок: практика'}
                                           {block.type === 'test' && 'Блок: тест'}
+                                          {block.type === 'youtube' && 'Блок: YouTube видео'}
                                         </Typography>
                                         <IconButton
                                           aria-label="Удалить блок"
@@ -564,6 +581,34 @@ export function CourseEditor({
                                             fullWidth
                                           />
                                         </>
+                                      )}
+
+                                      {block.type === 'youtube' && (
+                                        <Stack spacing={1}>
+                                          <TextField
+                                            label="Ссылка на YouTube видео"
+                                            placeholder="https://www.youtube.com/watch?v=... или https://youtu.be/..."
+                                            value={block.url || ''}
+                                            onChange={(e) =>
+                                              updateBlock(stage.id, block.id, { url: e.target.value })
+                                            }
+                                            fullWidth
+                                          />
+                                          {block.url && getYoutubeId(block.url) && (
+                                            <Box
+                                              component="iframe"
+                                              src={`https://www.youtube.com/embed/${getYoutubeId(block.url)}`}
+                                              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                              allowFullScreen
+                                              sx={{ width: '100%', height: 300, border: 0, borderRadius: 2 }}
+                                            />
+                                          )}
+                                          {block.url && !getYoutubeId(block.url) && (
+                                            <Typography variant="body2" color="error">
+                                              Не удалось распознать ссылку. Вставьте ссылку вида youtube.com/watch?v=... или youtu.be/...
+                                            </Typography>
+                                          )}
+                                        </Stack>
                                       )}
 
                                       {(block.type === 'image' || block.type === 'video') && (

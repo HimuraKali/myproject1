@@ -30,6 +30,11 @@ export const stagesSchema = z
           }),
           z.object({
             id: z.string().optional(),
+            type: z.literal('youtube'),
+            url: z.string().optional().default(''),
+          }),
+          z.object({
+            id: z.string().optional(),
             type: z.literal('test'),
             question: z.string(),
             optionsText: z.string(),

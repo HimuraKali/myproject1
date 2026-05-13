@@ -15,6 +15,11 @@ import {
 } from '@mui/material'
 import { useMemo, useState } from 'react'
 
+function getYoutubeId(url) {
+  const m = url?.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/)
+  return m ? m[1] : null
+}
+
 export function CourseViewer({
   course,
   showNextButton = true,
@@ -121,6 +126,16 @@ export function CourseViewer({
                             mx: 'auto',
                             bgcolor: 'background.default',
                           }}
+                        />
+                      )}
+
+                      {block.type === 'youtube' && block.url && getYoutubeId(block.url) && (
+                        <Box
+                          component="iframe"
+                          src={`https://www.youtube.com/embed/${getYoutubeId(block.url)}`}
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                          allowFullScreen
+                          sx={{ width: '100%', height: { xs: 240, md: 420 }, border: 0, borderRadius: 2, display: 'block' }}
                         />
                       )}
 
