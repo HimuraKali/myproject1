@@ -315,6 +315,12 @@ app.get('/api/admin/users', authRequired, adminRequired, async (_req, res) => {
   res.json({ users: users.map(toSafeUser) })
 })
 
+app.use((err, req, res, _next) => {
+  // eslint-disable-next-line no-console
+  console.error('[ERROR]', err)
+  res.status(500).json({ error: 'internal_server_error', message: err.message })
+})
+
 async function main() {
   await ensureAdmin()
   app.listen(config.port, () => {
