@@ -129,6 +129,11 @@ app.post('/api/courses', authRequired, async (req, res) => {
   if (!parsed.success) return res.status(400).json({ error: 'bad_request' })
   const { title, description, category, coverImage, stages } = parsed.data
 
+  const payloadSize = JSON.stringify(req.body).length
+  if (payloadSize > 8 * 1024 * 1024) {
+    return res.status(413).json({ error: 'payload_too_large', message: 'Курс слишком большой. Уменьшите размер видео или изображений (максимум ~8МБ).' })
+  }
+
   const course = await prisma.course.create({
     data: {
       title,
@@ -154,6 +159,11 @@ app.get('/api/my/courses', authRequired, async (req, res) => {
 app.put('/api/my/courses/:id', authRequired, async (req, res) => {
   const parsed = updateCourseSchema.safeParse(req.body)
   if (!parsed.success) return res.status(400).json({ error: 'bad_request' })
+
+  const payloadSize = JSON.stringify(req.body).length
+  if (payloadSize > 8 * 1024 * 1024) {
+    return res.status(413).json({ error: 'payload_too_large', message: 'Курс слишком большой. Уменьшите размер видео или изображений (максимум ~8МБ).' })
+  }
 
   const course = await prisma.course.findUnique({ where: { id: req.params.id } })
   if (!course) return res.status(404).json({ error: 'not_found' })
